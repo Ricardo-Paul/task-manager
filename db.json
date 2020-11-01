@@ -1,0 +1,40 @@
+{
+  "todos": [
+    {
+      "todo": "My task",
+      "complete": true
+    },
+    {
+      "todo": "My second task",
+      "complete": true
+    },
+    {
+      "todo": "My third task",
+      "complete": true
+    },
+    {
+      "todo": "Fourth task",
+      "complete": true
+    },
+    {
+      "id": 1,
+      "todo": "Finish the todo CLI",
+      "complete": false
+    },
+    {
+      "id": 1,
+      "todo": "Start an advanced CLI",
+      "complete": false
+    },
+    {
+      "id": 1,
+      "todo": "Read more code",
+      "complete": false
+    },
+    {
+      "id": 1,
+      "todo": "Get a feel of how the iDeal mobile app works",
+      "complete": false
+    }
+  ]
+}
