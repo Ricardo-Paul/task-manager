@@ -45,13 +45,15 @@ const logError = (errText) =>{
     console.error(chalk.red(errText))
 }
 
-
 async function newTodo (){
     let counter = (await db).get('counter').value();
     const question = chalk.blue(`Enter a task: `);
 
-    // here we try to simulate a read db by incrementing
-    // each record id based on the array length
+    // that's a real hack here
+    // we create a counter array in the db
+    // and use its value to generate unique ids
+    // meaning we dont remove any item from this array
+    // when we remove a todo.
 
     promptUser(question)
     .then( async answer => {
@@ -62,6 +64,8 @@ async function newTodo (){
             complete: false
         }).write();
 
+        // the only point of creating this record is
+        // to generate a unique id
         (await db).get('counter').push("record").write();
 
     }).then(()=>{
@@ -72,34 +76,36 @@ async function newTodo (){
 }
 
 async function getTodos(){
-    // const todos = (await db).get('todos').filter({ existed: true }).value();
-    let index = 1;
+    const todos = (await db).get('todos').sortBy('id').value();
 
     let complete = [];
     let incomplete = [];
 
-    const todos = (await db).get('todos').sortBy('id').value();
+    // push to complete or incomplete accordingly
     todos.forEach( (todo) => {
-    todo.complete?complete.push(todo):incomplete.push(todo);
-
-    const check = chalk.green(`✔`);
-        console.log(`=> ${chalk.green(todo.id)}. ${todo.complete?`${chalk.strikethrough(todo.todo)}`:`${todo.todo}`} ${todo.complete? `${check}`:''}`);
+        todo.complete?complete.push(todo):incomplete.push(todo);
     });
+
+    // assignments
+    const check = chalk.green(`✔`);
+    const doneTitle = chalk.cyan(`    FINISHED WORK [${complete.length}]`);
+    const undoneTitle = chalk.cyan(`    TASK TO COMPLETE [${incomplete.length}]`);
     
-    // console.log(`You're done with these tasks`);
-    // complete.map((c, i )=> {
-    //     i = i + 1;
-    //     console.log(`${chalk.green(i++)}. ${chalk.strikethrough(c.todo)}`);
-    // })
 
-    // console.log(`-----------------------------------------------------------`);
+    // log complete tasks
+    console.log(`${doneTitle}`);
+    complete.map(({ todo, id })=> {
+        console.log(`   ${chalk.green(id)}. ${chalk.red(todo)} ${check}`);
+    })
 
-    // console.log(`TASK TO COMPLETE \n`);
+    console.log();
+    console.log();
 
-    // incomplete.map((c, i )=> {
-    //     i = i +1;
-    //     console.log(`${chalk.green(i)}. ${c.todo}`);
-    // });
+    // log incomplete tasks
+    console.log(`${undoneTitle}`);
+    incomplete.map(({ todo, id })=> {
+        console.log(`   ${chalk.green(id)}. ${todo}`);
+    });
 }
 
 async function completeTodo(){
@@ -111,7 +117,7 @@ async function completeTodo(){
             return logError(`
             invalid number of args
             Please Enter <complete 'valid task number'>
-            `)
+            `);
         }
         if(isNaN(taskNumber) == true){
             return logError(`value should be a number`)

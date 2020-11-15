@@ -4,13 +4,7 @@
       "id": 1,
       "existed": true,
       "todo": "first todo",
-      "complete": false
-    },
-    {
-      "id": 4,
-      "existed": true,
-      "todo": "forth todo",
-      "complete": false
+      "complete": true
     },
     {
       "id": 5,
