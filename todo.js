@@ -75,6 +75,9 @@ async function newTodo (){
     })
 }
 
+/**
+ * dispaly complete and incomlete todos 
+ */
 async function getTodos(){
     const todos = (await db).get('todos').sortBy('id').value();
 
@@ -112,22 +115,19 @@ async function completeTodo(){
     // command should be ./todo.js complete 1
     //args number should be 4
     try{
-        const taskNumber = args[3];
+        const todoId = args[3];
         if(args.length != 4){
             return logError(`
             invalid number of args
             Please Enter <complete 'valid task number'>
             `);
         }
-        if(isNaN(taskNumber) == true){
+        if(isNaN(todoId) == true){
             return logError(`value should be a number`)
         }
         //make sure task number exist
         const todos = (await db).get('todos').value();
 
-        if(taskNumber > todos.length || taskNumber == 0){
-            return logError(`Not Existed !`)
-        }
         // (await db).get('todos').set(todos[taskNumber-1].complete, true).write();
         // console.log(todos[taskNumber-1].complete)
         // if we had an id for each todo, we could use find({id: id}) after get
@@ -135,8 +135,8 @@ async function completeTodo(){
         // we use task number to map it with an index.. its a working hack as there's no id
 
         // TODO: search through the undone tasks specifically
-        (await db).get(`todos[${taskNumber-1}]`)
-        .assign({complete: true}).write(); //works great
+        (await db).get('todos').find({id: parseInt(todoId, 10)})
+        .assign({complete: true}).write();
 
         return console.log(`Todo marked completed !
         `)
