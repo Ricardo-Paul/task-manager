@@ -1,25 +1,28 @@
 #!/usr/bin/env node
 
+
 const chalk = require('chalk');
-const { stdout } = require('process');
+const readline = require('readline');
+const low = require('lowdb');
+const FileAsync = require('lowdb/adapters/FileAsync');
+
+// imports
+const createDb = require('./utils/createDb');
+
+
 const command = process.argv.slice(2); //array of commands with the two default ones excluded
 const validCommands = ['new', 'get', 'complete', 'help', 'perso']
 const args = process.argv; //all args passed
 
 if(args.length === 2){
-    return console.log(`Please choose a command. Run <todo help>`)
+    return console.log(`Please choose a command. Run <todo help> for help`)
 }
+
 const chosenCommand = command[0].toString();
-const readline = require('readline');
 
-const low = require('lowdb');
-const FileAsync = require('lowdb/adapters/FileAsync');
-const { resolve } = require('path');
-const { log } = require('console');
 
-    const adapter = new FileAsync('db.json')
-    const db = low(adapter);
-    const def = db.then(db => db.defaults({ todos:[] }).write());
+// create the db
+const db = createDb('db.json');
 
 const displayUsageText = () => {
     const usageText = `
