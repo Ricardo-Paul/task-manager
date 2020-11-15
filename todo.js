@@ -3,15 +3,15 @@
 
 const chalk = require('chalk');
 const readline = require('readline');
-const low = require('lowdb');
-const FileAsync = require('lowdb/adapters/FileAsync');
 
-// imports
-const createDb = require('./utils/createDb');
 
+// utils imports
+const getDb = require('./utils/getDb');
+const promptUser = require('./utils/promptUser');
+const removeTodo = require('./actions/removeTodo');
 
 const command = process.argv.slice(2); //array of commands with the two default ones excluded
-const validCommands = ['new', 'get', 'complete', 'help', 'perso']
+const validCommands = ['new', 'get', 'complete', 'help', 'remove'];
 const args = process.argv; //all args passed
 
 if(args.length === 2){
@@ -22,7 +22,7 @@ const chosenCommand = command[0].toString();
 
 
 // create the db
-const db = createDb('db.json');
+const db = getDb();
 
 const displayUsageText = () => {
     const usageText = `
@@ -45,44 +45,51 @@ const logError = (errText) =>{
     console.error(chalk.red(errText))
 }
 
-const prompt = (question) => {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    })
-    return new Promise((resolve, error) => {
-        rl.question(question, answer => {
-            rl.close();
-            resolve(answer)
-        })
-    })
-}
 
-function newTodo (){
+async function newTodo (){
     const question = chalk.blue(`Enter a task: `);
-    prompt(question)
+
+    // here we try to simulate a read db by incrementing
+    // each record id based on the array length
+    // const todosLength = (await db).get('todos').value().length + 1;
+
+    promptUser(question)
     .then( async answer => {
-        // const database = await db;
-        let index = 1;
         (await db).get('todos').push({
-            id: index++,
+            // id: String(todosLength), //the db will only recognize the field if is a string
+            existed: true,
             todo: answer,
             complete: false
-        }).write()
-    }).then( ()=>{
+        }).write();
+
+    }).then(()=>{
         console.log(`${chalk.green('TASK ADDED !')}
         type <todo get> to see the list
-        `)
+        `);
     })
 }
 
 async function getTodos(){
-    const todos = (await db).get('todos').value();
+    const todos = (await db).get('todos').filter({ existed: true }).value();
     let index = 1;
-   return todos.forEach( (todo) => {
+
+    let complete = [];
+    let incomplete = [];
+
+    todos.forEach( (todo) => {
+    todo.complete?complete.push(todo):incomplete.push(todo);
     const check = chalk.green(`✔`);
-        console.log(`${index++}. ${todo.complete?`${chalk.strikethrough(todo.todo)}`:`${todo.todo}`} ${todo.complete? `${check}`:''}`)
+        // console.log(`=> ${chalk.green(index++)}. ${todo.complete?`${chalk.strikethrough(todo.todo)}`:`${todo.todo}`} ${todo.complete? `${check}`:''}`)
+    });
+    complete.map((c, i )=> {
+        console.log(`${chalk.green(i)}. ${c.todo}`);
     })
+
+    console.log(`-----------------------------------------------------------`);
+
+    incomplete.map((c, i )=> {
+        console.log(`${chalk.green(i)}. ${c.todo}`);
+    });
 }
 
 async function completeTodo(){
@@ -101,13 +108,18 @@ async function completeTodo(){
         }
         //make sure task number exist
         const todos = (await db).get('todos').value();
+
         if(taskNumber > todos.length || taskNumber == 0){
             return logError(`Not Existed !`)
         }
         // (await db).get('todos').set(todos[taskNumber-1].complete, true).write();
         // console.log(todos[taskNumber-1].complete)
         // if we had an id for each todo, we could use find({id: id}) after get
-        (await db).get(`todos[${taskNumber-1}]`).assign({complete: true}).write(); //works great
+
+        // we use task number to map it with an index.. its a working hack as there's no id
+        (await db).get(`todos[${taskNumber-1}]`)
+        .assign({complete: true}).write(); //works great
+
         return console.log(`Todo marked completed !
         `)
     } catch(error){
@@ -132,13 +144,16 @@ const interpretCommand = command => {
         case 'complete':
             completeTodo();
             break;
+        case 'remove':
+            removeTodo(args[3]);
+            break;
         default: console.log('Choose a command')
     }
 }
 
 // TODO: fix: ./todo.js get 1 should not show invalid command
 (function initialize(){
-    if(!oneArgument && chosenCommand != 'complete' ){
+    if(!oneArgument && chosenCommand != 'complete' && chosenCommand != 'remove' ){
         logError('One argument only is allowed, unless the command is <complete>')
         return;
     }
