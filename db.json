@@ -1,24 +1,29 @@
 {
   "todos": [
     {
+      "id": 1,
       "existed": true,
-      "todo": "first one",
-      "complete": true
-    },
-    {
-      "existed": true,
-      "todo": "second one",
+      "todo": "first todo",
       "complete": false
     },
     {
+      "id": 4,
       "existed": true,
-      "todo": "third one",
+      "todo": "forth todo",
       "complete": false
     },
     {
+      "id": 5,
       "existed": true,
-      "todo": "great task",
-      "complete": true
+      "todo": "should be 5",
+      "complete": false
     }
+  ],
+  "counter": [
+    "record",
+    "record",
+    "record",
+    "record",
+    "record"
   ]
 }

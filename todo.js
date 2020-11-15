@@ -47,20 +47,22 @@ const logError = (errText) =>{
 
 
 async function newTodo (){
+    let counter = (await db).get('counter').value();
     const question = chalk.blue(`Enter a task: `);
 
     // here we try to simulate a read db by incrementing
     // each record id based on the array length
-    // const todosLength = (await db).get('todos').value().length + 1;
 
     promptUser(question)
     .then( async answer => {
         (await db).get('todos').push({
-            // id: String(todosLength), //the db will only recognize the field if is a string
+            id: parseInt(counter.length + 1, 10),
             existed: true,
             todo: answer,
             complete: false
         }).write();
+
+        (await db).get('counter').push("record").write();
 
     }).then(()=>{
         console.log(`${chalk.green('TASK ADDED !')}
@@ -70,26 +72,34 @@ async function newTodo (){
 }
 
 async function getTodos(){
-    const todos = (await db).get('todos').filter({ existed: true }).value();
+    // const todos = (await db).get('todos').filter({ existed: true }).value();
     let index = 1;
 
     let complete = [];
     let incomplete = [];
 
+    const todos = (await db).get('todos').sortBy('id').value();
     todos.forEach( (todo) => {
     todo.complete?complete.push(todo):incomplete.push(todo);
+
     const check = chalk.green(`✔`);
-        // console.log(`=> ${chalk.green(index++)}. ${todo.complete?`${chalk.strikethrough(todo.todo)}`:`${todo.todo}`} ${todo.complete? `${check}`:''}`)
+        console.log(`=> ${chalk.green(todo.id)}. ${todo.complete?`${chalk.strikethrough(todo.todo)}`:`${todo.todo}`} ${todo.complete? `${check}`:''}`);
     });
-    complete.map((c, i )=> {
-        console.log(`${chalk.green(i)}. ${c.todo}`);
-    })
+    
+    // console.log(`You're done with these tasks`);
+    // complete.map((c, i )=> {
+    //     i = i + 1;
+    //     console.log(`${chalk.green(i++)}. ${chalk.strikethrough(c.todo)}`);
+    // })
 
-    console.log(`-----------------------------------------------------------`);
+    // console.log(`-----------------------------------------------------------`);
 
-    incomplete.map((c, i )=> {
-        console.log(`${chalk.green(i)}. ${c.todo}`);
-    });
+    // console.log(`TASK TO COMPLETE \n`);
+
+    // incomplete.map((c, i )=> {
+    //     i = i +1;
+    //     console.log(`${chalk.green(i)}. ${c.todo}`);
+    // });
 }
 
 async function completeTodo(){
@@ -117,6 +127,8 @@ async function completeTodo(){
         // if we had an id for each todo, we could use find({id: id}) after get
 
         // we use task number to map it with an index.. its a working hack as there's no id
+
+        // TODO: search through the undone tasks specifically
         (await db).get(`todos[${taskNumber-1}]`)
         .assign({complete: true}).write(); //works great
 
