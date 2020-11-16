@@ -19,9 +19,33 @@
       "todo": "another task with date",
       "complete": false,
       "date": "Sun Nov 15 2020"
+    },
+    {
+      "id": 10,
+      "existed": true,
+      "todo": "My new task with",
+      "complete": false,
+      "date": "Sun Nov 15 2020"
+    },
+    {
+      "id": 11,
+      "existed": true,
+      "todo": "work on socially",
+      "complete": false,
+      "date": "Sun Nov 15 2020"
+    },
+    {
+      "id": 12,
+      "existed": true,
+      "todo": "Do the front end",
+      "complete": false,
+      "date": "Sun Nov 15 2020"
     }
   ],
   "counter": [
+    "record",
+    "record",
+    "record",
     "record",
     "record",
     "record",

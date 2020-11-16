@@ -110,7 +110,7 @@ async function getTodos(){
     // log incomplete tasks
     console.log(`${undoneTitle}`);
     incomplete.map(({ todo, id, date })=> {
-        console.log(`   ${chalk.green(id)}. [ ${chalk.yellow(date)} ] ${todo}`);
+        console.log(`   ${chalk.green(id)}. [ ${chalk.blackBright(date)} ] ${chalk.white(todo)}`);
     });
 }
 
