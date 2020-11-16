@@ -1,19 +1,31 @@
 {
   "todos": [
     {
-      "id": 1,
+      "id": 7,
       "existed": true,
-      "todo": "first todo",
+      "todo": "work on my aapp",
       "complete": true
     },
     {
-      "id": 5,
+      "id": 8,
       "existed": true,
-      "todo": "should be 5",
-      "complete": true
+      "todo": "Task with dat",
+      "complete": false,
+      "date": "Sun Nov 15 2020"
+    },
+    {
+      "id": 9,
+      "existed": true,
+      "todo": "another task with date",
+      "complete": false,
+      "date": "Sun Nov 15 2020"
     }
   ],
   "counter": [
+    "record",
+    "record",
+    "record",
+    "record",
     "record",
     "record",
     "record",

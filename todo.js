@@ -2,13 +2,12 @@
 
 
 const chalk = require('chalk');
-const readline = require('readline');
-
 
 // utils imports
 const getDb = require('./utils/getDb');
 const promptUser = require('./utils/promptUser');
 const removeTodo = require('./actions/removeTodo');
+const validateEntry = require('./utils/validateEntry');
 
 const command = process.argv.slice(2); //array of commands with the two default ones excluded
 const validCommands = ['new', 'get', 'complete', 'help', 'remove'];
@@ -30,10 +29,11 @@ const displayUsageText = () => {
     this CLI app helps you manage your tasks
 
     usage:
-    new: create a new todo
-    get: retrieve a list of todos
-    complete: mark a todo as complete
-    help: get some help
+        new: create a new todo
+        get: retrieve a list of todos
+        complete: mark a todo as complete
+        help: get some help
+        remove: remove a todo <todo remove 1>
     `
     return console.log(usageText);
 }
@@ -45,9 +45,10 @@ const logError = (errText) =>{
     console.error(chalk.red(errText))
 }
 
-async function newTodo (){
+async function newTodo(){
     let counter = (await db).get('counter').value();
-    const question = chalk.blue(`Enter a task: `);
+    const question = chalk.yellow(`ENTER A TASK ::  `);
+    const currentDate = new Date().toDateString();
 
     // that's a real hack here
     // we create a counter array in the db
@@ -61,7 +62,8 @@ async function newTodo (){
             id: parseInt(counter.length + 1, 10),
             existed: true,
             todo: answer,
-            complete: false
+            complete: false,
+            date: currentDate
         }).write();
 
         // the only point of creating this record is
@@ -69,8 +71,9 @@ async function newTodo (){
         (await db).get('counter').push("record").write();
 
     }).then(()=>{
-        console.log(`${chalk.green('TASK ADDED !')}
-        type <todo get> to see the list
+        const check = chalk.green(`✔`);
+        console.log(`${chalk.green(`ADDED TO YOUR LIST ${check}`)}
+        type <${chalk.green('<todo get>')}> to see the list
         `);
     })
 }
@@ -106,43 +109,38 @@ async function getTodos(){
 
     // log incomplete tasks
     console.log(`${undoneTitle}`);
-    incomplete.map(({ todo, id })=> {
-        console.log(`   ${chalk.green(id)}. ${todo}`);
+    incomplete.map(({ todo, id, date })=> {
+        console.log(`   ${chalk.green(id)}. [ ${chalk.yellow(date)} ] ${todo}`);
     });
 }
 
 async function completeTodo(){
-    // command should be ./todo.js complete 1
-    //args number should be 4
-    try{
-        const todoId = args[3];
+    const todoId = args[3];
+    const record = (await db).get('todos').find({id: parseInt(todoId, 10)}).value();
+    if(!record){
+        console.log(`We can\'t seem to find a todo with id ${todoId} \n`);
+        return;
+    }
+
+
+    // TODO: may have to re-write these codes
         if(args.length != 4){
             return logError(`
             invalid number of args
             Please Enter <complete 'valid task number'>
             `);
         }
+        
         if(isNaN(todoId) == true){
             return logError(`value should be a number`)
         }
-        //make sure task number exist
-        const todos = (await db).get('todos').value();
+;
 
-        // (await db).get('todos').set(todos[taskNumber-1].complete, true).write();
-        // console.log(todos[taskNumber-1].complete)
-        // if we had an id for each todo, we could use find({id: id}) after get
-
-        // we use task number to map it with an index.. its a working hack as there's no id
-
-        // TODO: search through the undone tasks specifically
         (await db).get('todos').find({id: parseInt(todoId, 10)})
-        .assign({complete: true}).write();
+        .assign({complete: true}).write().then(() => {
+            console.log(`COMPLETED`);
+        });
 
-        return console.log(`Todo marked completed !
-        `)
-    } catch(error){
-        console.log('Something went wrong!', error)
-    }
 }
 
 const interpretCommand = command => {

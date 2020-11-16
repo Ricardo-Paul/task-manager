@@ -2,7 +2,7 @@ const low = require('lowdb');
 const FileAsync = require('lowdb/adapters/FileAsync');
 
 /**
- * get the db
+ * exports the db with default values
  */
 
 module.exports = () => {
